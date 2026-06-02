@@ -1,0 +1,87 @@
+# === 参考资料（外部项目，不纳入版本控制） ===
+codex/
+agentscope/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+*.whl
+*.pyi
+*.egg-info/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+
+# === 虚拟环境 ===
+.env/
+.venv/
+env/
+ENV/
+venv/
+*.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# === IDE & 编辑器 ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# === OS 文件 ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# === 测试 ===
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# === Jupyter ===
+.ipynb_checkpoints/
+
+# === 类型检查 ===
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# === 日志 ===
+*.log
+
+# === 环境变量 & 密钥 ===
+.env
+.env.local
+*.key
+*.pem
+*.crt
+
+# === Claude Code ===
+.claude/
+.openspec/
