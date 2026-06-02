@@ -1,0 +1,19 @@
+[project]
+name = "hicoder"
+version = "0.1.0"
+description = "A Codex-style coding agent built on AgentScope."
+requires-python = ">=3.12"
+dependencies = [
+    "agentscope>=2.0.0,<3.0.0",
+]
+
+[project.scripts]
+hicoder = "hicoder.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
