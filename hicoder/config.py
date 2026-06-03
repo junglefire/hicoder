@@ -17,6 +17,7 @@ class Config(BaseModel):
     max_tokens: int = Field(default=4096, gt=0)
     approval_policy: str = Field(default="auto")
     sandbox_mode: str = Field(default="workspace-write")
+    cwd: str = Field(default=".")
 
 
 def load_config(path: Path) -> Config:
