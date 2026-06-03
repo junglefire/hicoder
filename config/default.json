@@ -1,0 +1,9 @@
+{
+    "model": "qwen3.6-plus",
+    "provider": "openai",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "api_key": "env:DASHSCOPE_API_KEY",
+    "max_tokens": 4096,
+    "approval_policy": "auto",
+    "sandbox_mode": "workspace-write"
+}

@@ -14,16 +14,18 @@ from agentscope.model import (
     OpenAIChatModel,
 )
 
-from ..config import Config
-from ..protocol.adapter import from_chat_response, to_agentscope_messages
-from ..protocol.events import AgentEvent, Error
-from ..protocol.models import AgentMessage
+from hicoder.config import Config
+from hicoder.protocol import (
+    AgentEvent,
+    AgentMessage,
+    Error,
+    from_chat_response,
+    to_agentscope_messages,
+)
 
 
 @dataclass
 class ModelParams:
-    """Parameters passed to the model on each call."""
-
     temperature: float | None = None
     max_tokens: int | None = None
     top_p: float | None = None
@@ -31,20 +33,6 @@ class ModelParams:
 
 
 class ModelClient:
-    """Wraps an AgentScope model and yields HiCoder AgentEvent objects.
-
-    Usage::
-
-        client = ModelClient.from_config(config)
-        async for event in client.stream(
-            messages=[AgentMessage(role="user", content="Hello")]
-        ):
-            if isinstance(event, TextDelta):
-                print(event.text, end="")
-            elif isinstance(event, TurnComplete):
-                print(f"\\nTokens: {event.usage.total_tokens}")
-    """
-
     def __init__(
         self,
         model: ChatModelBase,
@@ -55,17 +43,6 @@ class ModelClient:
 
     @classmethod
     def from_config(cls, config: Config) -> "ModelClient":
-        """Create a ModelClient from a loaded HiCoder Config.
-
-        Args:
-            config: The loaded configuration with api_key resolved.
-
-        Returns:
-            A ready-to-use ModelClient.
-
-        Raises:
-            ValueError: If the provider is unknown.
-        """
         if config.api_key is None:
             raise ValueError(
                 "api_key must be set before creating ModelClient. "
@@ -73,7 +50,7 @@ class ModelClient:
             )
 
         if config.provider == "openai":
-            credential = OpenAICredential(api_key=config.api_key)
+            credential = OpenAICredential(api_key=config.api_key, base_url=config.base_url)
             params = OpenAIChatModel.Parameters(
                 max_tokens=config.max_tokens,
                 temperature=None,
@@ -85,7 +62,7 @@ class ModelClient:
                 stream=True,
             )
         elif config.provider == "anthropic":
-            credential = AnthropicCredential(api_key=config.api_key)
+            credential = AnthropicCredential(api_key=config.api_key, base_url=config.base_url)
             params = AnthropicChatModel.Parameters(
                 max_tokens=config.max_tokens,
                 temperature=None,
@@ -106,29 +83,16 @@ class ModelClient:
         messages: list[AgentMessage],
         tools: list[dict] | None = None,
     ) -> AsyncGenerator[AgentEvent, None]:
-        """Stream model response as HiCoder AgentEvent objects.
-
-        Args:
-            messages: List of conversation messages.
-            tools: Optional tool definitions (JSON Schema format).
-
-        Yields:
-            AgentEvent objects: TextDelta, ToolCall, ToolCallDone, TurnComplete, Error.
-        """
         try:
             as_messages = to_agentscope_messages(messages)
             response = await self._model(as_messages, tools=tools)
 
             if isinstance(response, ChatResponse):
-                # Non-streaming: single response
                 for event in from_chat_response(response):
                     yield event
             else:
-                # Streaming: async generator
                 final_response: ChatResponse | None = None
                 async for chunk in response:
-                    # Only yield the final complete response as events
-                    # to avoid emitting partial content multiple times
                     if chunk.is_last:
                         final_response = chunk
 

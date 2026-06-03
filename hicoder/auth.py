@@ -18,7 +18,7 @@ _ENV_MAP: dict[str, str] = {
 
 
 class ApiKeyError(Exception):
-    """Raised when no API key can be found."""
+    pass
 
 
 def resolve_api_key(
@@ -27,20 +27,8 @@ def resolve_api_key(
 ) -> str:
     """Resolve the API key for the given provider.
 
-    Resolution order:
-    1. Environment variable (OPENAI_API_KEY / ANTHROPIC_API_KEY)
-    2. config_api_key from loaded config file
-    3. Raise ApiKeyError if neither is available
-
-    Args:
-        provider: The model provider ("openai" or "anthropic").
-        config_api_key: API key from config file (may be empty string).
-
-    Returns:
-        The resolved API key string.
-
-    Raises:
-        ApiKeyError: If no key found from either source.
+    Resolution order: env var → config file.
+    Config supports "env:<VAR_NAME>" syntax for indirect env lookup.
     """
     env_var = _ENV_MAP.get(provider)
     if env_var:
@@ -49,13 +37,20 @@ def resolve_api_key(
             return env_value
 
     if config_api_key:
-        return config_api_key
+        if config_api_key.startswith("env:"):
+            var_name = config_api_key[len("env:"):].strip()
+            if var_name:
+                resolved = os.environ.get(var_name, "").strip()
+                if resolved:
+                    return resolved
+        else:
+            return config_api_key
 
     env_hint = f"{_ENV_MAP[provider]}" if provider in _ENV_MAP else f"{provider.upper()}_API_KEY"
     raise ApiKeyError(
         f"No API key found for provider '{provider}'. "
         f"Set the {env_hint} environment variable, or add "
-        f"'api_key' to your config.toml."
+        f"'api_key' to your config.toml (use 'env:<VAR_NAME>' to reference an env var)."
     )
 
 
@@ -63,15 +58,6 @@ def make_credential(
     provider: Literal["openai", "anthropic"],
     api_key: str,
 ):
-    """Create an AgentScope credential for the given provider.
-
-    Args:
-        provider: The model provider.
-        api_key: The resolved API key.
-
-    Returns:
-        An OpenAICredential or AnthropicCredential instance.
-    """
     if provider == "openai":
         return OpenAICredential(api_key=api_key)
     elif provider == "anthropic":

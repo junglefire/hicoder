@@ -12,7 +12,7 @@ from agentscope.message import (
 )
 from agentscope.model._model_response import ChatResponse
 
-from ..protocol.events import (
+from hicoder.protocol.events import (
     AgentEvent,
     TextDelta,
     ToolCall,
@@ -21,7 +21,7 @@ from ..protocol.events import (
     Error,
     TokenUsage,
 )
-from ..protocol.models import AgentMessage
+from hicoder.protocol.models import AgentMessage
 
 
 def to_agentscope_messages(messages: list[AgentMessage]) -> list[Msg]:
